@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "856832115877",
+    "project_id": "k-gpt-37920",
+    "storage_bucket": "k-gpt-37920.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856832115877:android:823f7de13d7f3c0d28f94c",
+        "android_client_info": {
+          "package_name": "com.example.kgpt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "856832115877-strmi8o9fro8r7qpkjhsm9phmqmiqqvr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcD82NxyvWmzbQzuVQYB5koJcf-_6CsA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "856832115877-strmi8o9fro8r7qpkjhsm9phmqmiqqvr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
