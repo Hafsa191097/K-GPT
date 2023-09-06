@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:kgpt/firestoreData/saveData.dart';
 import 'package:provider/provider.dart';
 import '../constants/constants.dart';
 import '../providers/chat_provider.dart';
 import '../providers/models_provider.dart';
 import '../services/showmodel.dart';
-import '../Authentication/auth.dart';
 import '../widgets/TextWidget.dart';
 import '../widgets/chat_widget.dart';
 import 'NavigationDrawer.dart';
@@ -21,10 +21,7 @@ class GptScreen extends StatefulWidget {
 }
 
 class _GptScreenState extends State<GptScreen> {
-
-
- User? _user;
-
+  User? _user;
 
   Future<void> _getUserProfile() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -34,7 +31,6 @@ class _GptScreenState extends State<GptScreen> {
       });
     }
   }
-
 
   bool _isTyping = false;
 
@@ -58,15 +54,18 @@ class _GptScreenState extends State<GptScreen> {
     super.dispose();
   }
 
-  
-   @override
+  @override
   Widget build(BuildContext context) {
     final modelsProvider = Provider.of<ModelsProvider>(context);
     final chatProvider = Provider.of<ChatProvider>(context);
+
+    //  FirestoreService()
+    //  .createMessageDocument('ywHcESIgn2w3jHKbrT71', 'pass hogya', 'answer');
+
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black54),
-        title:  FutureBuilder<User?>(
+        iconTheme: IconThemeData(color: textcolortheme),
+        title: FutureBuilder<User?>(
           future: FirebaseAuth.instance.authStateChanges().first,
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -75,13 +74,19 @@ class _GptScreenState extends State<GptScreen> {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else {
               _user = snapshot.data;
-              return _user != null 
-                ? Text(_user!.displayName ?? 'N/A',style:TextStyle(color:Colors.black54,fontSize: 20,))
-                : const Text('User not logged in.');
-              }
-            },
-          ),
-        centerTitle:true,
+              return _user != null
+                  ? Text(
+                      _user!.displayName ?? 'N/A',
+                      style: TextStyle(
+                        color: textcolortheme,
+                        fontSize: 20,
+                      ),
+                    )
+                  : const Text('User not logged in.');
+            }
+          },
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () async {
@@ -98,15 +103,14 @@ class _GptScreenState extends State<GptScreen> {
             Flexible(
               child: ListView.builder(
                   controller: _listScrollController,
-                  itemCount: chatProvider.getChatList.length, 
+                  itemCount: chatProvider.getChatList.length,
                   itemBuilder: (context, index) {
                     return ChatWidget(
-                      msg: chatProvider
-                          .getChatList[index].msg, 
-                      chatIndex: chatProvider.getChatList[index]
-                          .chatIndex, 
+                      msg: chatProvider.getChatList[index].msg,
+                      chatIndex: chatProvider.getChatList[index].chatIndex,
                       shouldAnimate:
                           chatProvider.getChatList.length - 1 == index,
+                      status: chatProvider.getChatList[index].status,
                     );
                   }),
             ),
@@ -128,31 +132,30 @@ class _GptScreenState extends State<GptScreen> {
                     Expanded(
                       child: TextField(
                         focusNode: focusNode,
-                        style: const TextStyle(color: Colors.black54),
+                        style:  TextStyle(color: textcolortheme),
                         controller: textEditingController,
                         onSubmitted: (value) async {
                           await sendMessageFCT(
                               modelsProvider: modelsProvider,
                               chatProvider: chatProvider);
                         },
-                        decoration: const InputDecoration.collapsed(
-                            hintText: "How can I help you",
-                            hintStyle: TextStyle(color: Colors.black54)),
+                        decoration:  InputDecoration.collapsed(
+                          hintText: "How can I help you",
+                          hintStyle: TextStyle(color: textcolortheme),
+                        ),
                       ),
                     ),
                     IconButton(
-                        onPressed: () async {
-                          await sendMessageFCT(
-                              modelsProvider: modelsProvider,
-                              chatProvider: chatProvider
-                            );
-                          
-                          
-                        },
-                        icon: const Icon(
-                          Icons.send,
-                          color: Colors.black54,
-                        ))
+                      onPressed: () async {
+                        await sendMessageFCT(
+                            modelsProvider: modelsProvider,
+                            chatProvider: chatProvider);
+                      },
+                      icon:  Icon(
+                        Icons.send,
+                        color: textcolortheme,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -170,33 +173,47 @@ class _GptScreenState extends State<GptScreen> {
         curve: Curves.easeOut);
   }
 
+  Future<void> addMessageToFirestore(String message, String type) async {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    String chatId = chatProvider.getChatId;
+    // defualt state of chatId is empty string
+    log("chat id is: $chatId");
+    if (chatId == '') {
+      chatId = await FirestoreService().createChatDocument(message);
+      chatProvider.setChatId(chatId);
+    }
+    log("calling createMessageDocument");
+    await FirestoreService().createMessageDocument(chatId, message, type);
+    log("done createMessageDocument");
+  }
+
   Future<void> sendMessageFCT(
       {required ModelsProvider modelsProvider,
       required ChatProvider chatProvider}) async {
     if (_isTyping) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: TextWidget(
             label: "You cant send multiple messages at a time",
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.normal,
           ),
-          backgroundColor: Colors.black54,
+          backgroundColor: textcolortheme,
         ),
       );
       return;
     }
     if (textEditingController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: TextWidget(
             label: "Please type a message",
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.normal,
           ),
-          backgroundColor: Colors.black54,
+          backgroundColor: textcolortheme,
         ),
       );
       return;
@@ -205,15 +222,18 @@ class _GptScreenState extends State<GptScreen> {
       String msg = textEditingController.text;
       setState(() {
         _isTyping = true;
-        
+
         chatProvider.addUserMessage(msg: msg);
+        // save the question to firestore
         textEditingController.clear();
         focusNode.unfocus();
       });
+      await addMessageToFirestore(msg, 'question');
+
       await chatProvider.sendMessageAndGetAnswers(
           msg: msg, chosenModelId: modelsProvider.getCurrentModel);
-      
-      
+      // save the answer to firestore
+      addMessageToFirestore(chatProvider.getChatList.last.msg, 'answer');
       setState(() {});
     } catch (error) {
       log("error $error");
@@ -224,7 +244,7 @@ class _GptScreenState extends State<GptScreen> {
           fontSize: 14,
           fontWeight: FontWeight.normal,
         ),
-        backgroundColor: Colors.black54,
+        backgroundColor: textcolortheme,
       ));
     } finally {
       setState(() {

@@ -40,7 +40,7 @@ class _ModelsDrowDownWidgetState extends State<ModelsDrowDownWidget> {
             return Center(
               child: TextWidget(
                 label: snapshot.error.toString(),
-                color: Colors.black54,
+                color: textcolortheme,
                 fontSize: 15,
                 fontWeight: FontWeight.normal,
               ),
@@ -58,7 +58,7 @@ class _ModelsDrowDownWidgetState extends State<ModelsDrowDownWidget> {
                             value: snapshot.data![index].id,
                             child: TextWidget(
                               label: snapshot.data![index].id,
-                              color: Colors.black54,
+                              color: textcolortheme,
                               fontWeight: FontWeight.normal,
                               fontSize: 15,
                             ))),

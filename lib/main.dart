@@ -20,8 +20,16 @@ Future<void> main() async{
   FlutterNativeSplash.remove();
 }
 
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+
+class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ChatProvider(),
         ),
+        
       ],
       child: MaterialApp(
         title: 'Flutter ChatBOT',
@@ -42,6 +51,7 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(
               color: cardColor,
             )),
+        
         home: const PreApp(),
       ),
     );

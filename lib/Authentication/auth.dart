@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -47,24 +45,9 @@ class FirebaseAuthentication{
     }
   }
   Future<void> signOut() async {
+    await googleSignIn.disconnect();
     await FirebaseAuth.instance.signOut();
   }
-
-  // void createChatsDocument(String msg) {
-  //   // Get the current user's userId.
-  //   final userId = FirebaseAuth.instance.currentUser?.uid;
-
-  //   // Create a new document in the "Chats" collection.
-  //   final chatsDocument = FirebaseFirestore.instance.collection('Chats').doc(userId);
-
-  //   // Set the createdAt field to the current time.
-  //   chatsDocument.set({
-  //     'created_at': FieldValue.serverTimestamp(),
-  //     'hasSentFirstMessage': false,
-  //     'created_by': userId.toString(),
-  //     'covo_name': msg.toString(),
-  //   });
-  // }
 
   
 }

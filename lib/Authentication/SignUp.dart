@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/constants.dart';
 import 'auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,11 +21,11 @@ class _SignUpState extends State<SignUp> {
             SizedBox(height:100,width:100,child: Image.asset('assets/logo.png')),
             const SizedBox(height:20),
             Text('Welcome to ChatGPT',style: GoogleFonts.nunitoSans(
-              color: Colors.black54, fontSize: 30, fontWeight: FontWeight.w500, 
+              color: textcolortheme, fontSize: 30, fontWeight: FontWeight.w500, 
             )),
             const SizedBox(height:10),
             Text('Ask anything, get your answer',style: GoogleFonts.nunitoSans(
-              color: Colors.black54, fontSize: 16, fontWeight: FontWeight.w500,
+              color: textcolortheme, fontSize: 16, fontWeight: FontWeight.w500,
             )),
             const SizedBox(height:80),
             GoogleSignInButton(),

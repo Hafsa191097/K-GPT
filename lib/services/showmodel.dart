@@ -15,7 +15,7 @@ class Services {
         backgroundColor: scaffoldBackgroundColor,
         context: context,
         builder: (context) {
-          return const Padding(
+          return  Padding(
             padding: EdgeInsets.all(18.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -24,7 +24,7 @@ class Services {
                   child: TextWidget(
                     label: "Choose Model:",
                     fontSize: 16,
-                    color: Colors.black54,
+                    color: textcolortheme,
                     fontWeight: FontWeight.normal,
                   ),
                 ),

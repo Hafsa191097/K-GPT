@@ -2,29 +2,32 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kgpt/firestoreData/saveData.dart';
+import 'package:kgpt/providers/chat_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/constants.dart';
 import 'TextWidget.dart';
 
-
+// ignore: must_be_immutable
 class ChatWidget extends StatefulWidget {
-  const ChatWidget(
+   ChatWidget(
       {super.key,
       required this.msg,
       required this.chatIndex,
+      this.status = "neutral",
       this.shouldAnimate = false});
 
   final String msg;
   final int chatIndex;
   final bool shouldAnimate;
+  String status;
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-
-  
   User? _user;
 
   @override
@@ -57,96 +60,145 @@ class _ChatWidgetState extends State<ChatWidget> {
                   children: [
                     FutureBuilder<User?>(
                       future: FirebaseAuth.instance.authStateChanges().first,
-                      builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                      builder: (BuildContext context,
+                          AsyncSnapshot<User?> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Error: ${snapshot.error}'));
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
                         } else {
                           _user = snapshot.data;
-                          return _user != null 
-                              ?
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                CircleAvatar(
-                                  radius:20,
-                                  backgroundImage: NetworkImage(
-                                    widget.chatIndex == 0 
-                                    ? _user?.photoURL ?? 'No Image' : 'https://www.edigitalagency.com.au/wp-content/uploads/chatgpt-logo-white-green-background-png.png'
-                                    
-                                  ),
-                                ),
-                             ],
-                            )
-                            : const Center(child: Text('User not logged in.'));
-                          }
-                        },
-                      ),
+                          return _user != null
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundImage: NetworkImage(widget
+                                                  .chatIndex ==
+                                              0
+                                          ? _user?.photoURL ?? 'No Image'
+                                          : 'https://www.edigitalagency.com.au/wp-content/uploads/chatgpt-logo-white-green-background-png.png'),
+                                    ),
+                                  ],
+                                )
+                              : const Center(
+                                  child: Text('User not logged in.'));
+                        }
+                      },
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: widget.chatIndex == 0
-                      ? TextWidget(
-                          label: widget.msg,
-                          color: text1Color,
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
-                        )
-                      : widget.shouldAnimate
-                          ? Padding(
-                            padding: const EdgeInsets.only(right:8.0),
-                            child: DefaultTextStyle(
-                                style:GoogleFonts.nunitoSans(
-                                  color: text1Color,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal,
-                                ),
-                                child: AnimatedTextKit(
-                                  
-                                  isRepeatingAnimation: false,
-                                  repeatForever: false,
-                                  displayFullTextOnTap: true,
-                                  totalRepeatCount: 1,
-                                  animatedTexts: [
-                                    TyperAnimatedText(
-                                      textAlign: TextAlign.justify,
-                                      widget.msg.trim(),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          ? TextWidget(
+                              label: widget.msg,
+                              color: text1Color,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
                             )
-                          : 
-                          Text(
-                            widget.msg.trim(),
-                              
-                          ),
-                  
+                          : widget.shouldAnimate
+                              ? Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: DefaultTextStyle(
+                                    style: GoogleFonts.nunitoSans(
+                                      color: text1Color,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    child: AnimatedTextKit(
+                                      isRepeatingAnimation: false,
+                                      repeatForever: false,
+                                      displayFullTextOnTap: true,
+                                      totalRepeatCount: 1,
+                                      animatedTexts: [
+                                        TyperAnimatedText(
+                                          textAlign: TextAlign.justify,
+                                          widget.msg.trim(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  widget.msg.trim(),
+                                ),
                     ),
                   ],
                 ),
                 widget.chatIndex == 0
-                ? const SizedBox.shrink()
-                :  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    
-                    children: [
-                      Icon(
-                        Icons.thumb_up_alt_outlined,
-                        color: text1Color,
+                    ? const SizedBox.shrink()
+                    : StatefulBuilder(
+                        builder: (context, setState) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  final chatProvider =
+                                      Provider.of<ChatProvider>(context,
+                                          listen: false);
+
+                                  String chatId = chatProvider.chatId;
+
+                                  setState(() {
+                                    if (widget.status == 'liked') {
+                                      widget.status = 'neutral';
+                                    } else {
+                                      widget.status = 'liked';
+                                    }
+                                  });
+
+                                  FirestoreService().updateLikeDislikeStatus(
+                                      chatId, widget.msg, widget.status);
+                                },
+                                padding: EdgeInsets.only(
+                                    left: 10), // Set padding to zero
+
+                                icon: Icon(
+                                  widget.status == 'liked'
+                                      ? Icons.thumb_up_alt
+                                      : Icons.thumb_up_alt_outlined,
+                                  color: text1Color,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  final chatProvider =
+                                      Provider.of<ChatProvider>(context,
+                                          listen: false);
+
+                                  String chatId = chatProvider.chatId;
+                                  setState(() {
+                                    if (widget.status == 'disliked') {
+                                      widget.status = 'neutral';
+                                    } else {
+                                      widget.status = 'disliked';
+                                    }
+                                  });
+                                  // assign this new value to firestore &
+                                  // provider if needed
+                                  FirestoreService().updateLikeDislikeStatus(
+                                      chatId, widget.msg, widget.status);
+                                },
+                                padding: EdgeInsets.only(
+                                    right: 10), // Set padding to zero
+
+                                icon: Icon(
+                                  widget.status == 'disliked'
+                                      ? Icons.thumb_down_alt
+                                      : Icons.thumb_down_alt_outlined,
+                                  color: text1Color,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Icon(
-                        Icons.thumb_down_alt_outlined,
-                        color: text1Color,
-                      ),
-                      SizedBox(width:10),
-                    ],
-                  ),
               ],
-                
             ),
           ),
         ),
@@ -154,5 +206,3 @@ class _ChatWidgetState extends State<ChatWidget> {
     );
   }
 }
-
-
