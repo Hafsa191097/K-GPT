@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kgpt/Screens/NavigationDrawer.dart';
 import 'package:kgpt/firestoreData/saveData.dart';
+import 'package:kgpt/providers/dark_theme_provider.dart';
 import 'package:kgpt/services/showmodel.dart';
-import 'package:kgpt/widgets/chat_widget.dart';
-
-import '../constants/constants.dart';
+import 'package:provider/provider.dart';
+import '../widgets/likes_dislike_widget.dart';
 
 class LikesDislikeScreen extends StatefulWidget {
   const LikesDislikeScreen({super.key});
@@ -19,9 +19,18 @@ class _LikesDislikeScreenState extends State<LikesDislikeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<DarkThemeProvider>(context);
+    bool isDark = themeProvider.darkTheme;
+
     return Scaffold(
+      backgroundColor: isDark
+            ? Color.fromARGB(214, 40, 41, 57)
+            : Color.fromARGB(255, 249, 249, 249),
       appBar: AppBar(
-        iconTheme: IconThemeData(color: textcolortheme),
+        backgroundColor: isDark
+            ? Color.fromARGB(214, 40, 41, 57)
+            : Color.fromARGB(255, 249, 249, 249),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black54),
         title: FutureBuilder<User?>(
           future: FirebaseAuth.instance.authStateChanges().first,
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
@@ -35,7 +44,7 @@ class _LikesDislikeScreenState extends State<LikesDislikeScreen> {
                   ? Text(
                       _user!.displayName ?? 'N/A',
                       style: TextStyle(
-                        color: textcolortheme,
+                        color: isDark ? Colors.white : Colors.black54,
                         fontSize: 20,
                       ),
                     )
@@ -61,15 +70,14 @@ class _LikesDislikeScreenState extends State<LikesDislikeScreen> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var likesDislikes = snapshot.data;
-
                 return Flexible(
                   child: ListView.builder(
                     itemCount: likesDislikes!.length,
                     itemBuilder: (context, index) {
                       var favJSON = likesDislikes[index];
-                      return ChatWidget(
+                      return LikesDislikesMessageWidget(
+                        chatId: favJSON['chat_id'],
                         msg: favJSON["message"],
-                        chatIndex: 1,
                         shouldAnimate: false,
                         status: favJSON["status"],
                       );

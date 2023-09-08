@@ -4,11 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:kgpt/firestoreData/saveData.dart';
+import 'package:kgpt/providers/dark_theme_provider.dart';
+import 'package:kgpt/sharedpreference/darkmode.dart';
 import 'package:provider/provider.dart';
 import '../constants/constants.dart';
 import '../providers/chat_provider.dart';
 import '../providers/models_provider.dart';
 import '../services/showmodel.dart';
+import '../Authentication/auth.dart';
 import '../widgets/TextWidget.dart';
 import '../widgets/chat_widget.dart';
 import 'NavigationDrawer.dart';
@@ -58,13 +61,19 @@ class _GptScreenState extends State<GptScreen> {
   Widget build(BuildContext context) {
     final modelsProvider = Provider.of<ModelsProvider>(context);
     final chatProvider = Provider.of<ChatProvider>(context);
+    final themeProvider = Provider.of<DarkThemeProvider>(context);
+    bool isDark = themeProvider.darkTheme;
 
     //  FirestoreService()
     //  .createMessageDocument('ywHcESIgn2w3jHKbrT71', 'pass hogya', 'answer');
 
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: textcolortheme),
+backgroundColor: isDark
+            ? Color.fromARGB(214, 40, 41, 57)
+            : Color.fromARGB(255, 249, 249, 249),      appBar: AppBar(
+        backgroundColor: isDark? Color.fromARGB(214, 40, 41, 57) 
+        :Color.fromARGB(255, 249, 249, 249),
+        iconTheme: IconThemeData(color:  isDark? Colors.white:Colors.black54),
         title: FutureBuilder<User?>(
           future: FirebaseAuth.instance.authStateChanges().first,
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
@@ -78,7 +87,7 @@ class _GptScreenState extends State<GptScreen> {
                   ? Text(
                       _user!.displayName ?? 'N/A',
                       style: TextStyle(
-                        color: textcolortheme,
+                        color:  isDark? Colors.white:Colors.black54,
                         fontSize: 20,
                       ),
                     )
@@ -109,7 +118,9 @@ class _GptScreenState extends State<GptScreen> {
                       msg: chatProvider.getChatList[index].msg,
                       chatIndex: chatProvider.getChatList[index].chatIndex,
                       shouldAnimate:
-                          chatProvider.getChatList.length - 1 == index,
+                          chatProvider.shouldanimatelast == false ? 
+                          chatProvider.getChatList.length - 1 == index :
+                          chatProvider.shouldanimatelast == true,
                       status: chatProvider.getChatList[index].status,
                     );
                   }),
@@ -124,7 +135,7 @@ class _GptScreenState extends State<GptScreen> {
               height: 15,
             ),
             Material(
-              color: cardColor,
+              color: isDark? Color.fromARGB(213, 52, 54, 74):cardColor,
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Row(
@@ -132,7 +143,7 @@ class _GptScreenState extends State<GptScreen> {
                     Expanded(
                       child: TextField(
                         focusNode: focusNode,
-                        style:  TextStyle(color: textcolortheme),
+                        style:  TextStyle(color: isDark? Colors.white:Colors.black54),
                         controller: textEditingController,
                         onSubmitted: (value) async {
                           await sendMessageFCT(
@@ -141,7 +152,7 @@ class _GptScreenState extends State<GptScreen> {
                         },
                         decoration:  InputDecoration.collapsed(
                           hintText: "How can I help you",
-                          hintStyle: TextStyle(color: textcolortheme),
+                          hintStyle: TextStyle(color: isDark? Colors.white:Colors.black54),
                         ),
                       ),
                     ),
@@ -153,7 +164,7 @@ class _GptScreenState extends State<GptScreen> {
                       },
                       icon:  Icon(
                         Icons.send,
-                        color: textcolortheme,
+                        color: isDark? Colors.white:Colors.black54,
                       ),
                     ),
                   ],
@@ -192,28 +203,28 @@ class _GptScreenState extends State<GptScreen> {
       required ChatProvider chatProvider}) async {
     if (_isTyping) {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+        const SnackBar(
           content: TextWidget(
             label: "You cant send multiple messages at a time",
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.normal,
           ),
-          backgroundColor: textcolortheme,
+          backgroundColor: Colors.black54,
         ),
       );
       return;
     }
     if (textEditingController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+        const SnackBar(
           content: TextWidget(
             label: "Please type a message",
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.normal,
           ),
-          backgroundColor: textcolortheme,
+          backgroundColor: Colors.black54,
         ),
       );
       return;
@@ -244,7 +255,7 @@ class _GptScreenState extends State<GptScreen> {
           fontSize: 14,
           fontWeight: FontWeight.normal,
         ),
-        backgroundColor: textcolortheme,
+        backgroundColor: Colors.black54,
       ));
     } finally {
       setState(() {

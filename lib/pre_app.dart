@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'Authentication/SignUp.dart';
+import 'Authentication/Register.dart';
 import 'Screens/GptScreen.dart';
 
 
@@ -25,7 +25,7 @@ class PreApp extends StatelessWidget {
         } else if (snapshot.hasData) { // user is logged in
           return const GptScreen();
         } else { //user is null
-          return const SignUp();
+          return const Register();
         }
       },
     );

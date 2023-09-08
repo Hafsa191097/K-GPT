@@ -7,6 +7,14 @@ class ChatProvider with ChangeNotifier {
   List<ChatModel> get getChatList {
     return chatList;
   }
+  bool shouldanimatelast = false;
+  void setshouldanimatelast(newshouldanimatelast){
+    shouldanimatelast = newshouldanimatelast;
+  }
+
+  bool get getshouldanimatelast{
+    return shouldanimatelast;
+  }
 
   String chatId = '';
   String get getChatId {
@@ -29,7 +37,6 @@ class ChatProvider with ChangeNotifier {
   void setChatList(List<ChatModel> c) {
     chatList = c;
     notifyListeners();
-    
   }
 
   void addUserMessage({required String msg}) {

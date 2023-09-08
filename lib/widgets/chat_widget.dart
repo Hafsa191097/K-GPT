@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kgpt/firestoreData/saveData.dart';
 import 'package:kgpt/providers/chat_provider.dart';
+import 'package:kgpt/providers/dark_theme_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/constants.dart';
 import 'TextWidget.dart';
 
-// ignore: must_be_immutable
 class ChatWidget extends StatefulWidget {
-   ChatWidget(
+  ChatWidget(
       {super.key,
       required this.msg,
       required this.chatIndex,
@@ -47,10 +47,18 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<DarkThemeProvider>(context);
+    bool isDark = themeProvider.darkTheme;
     return Column(
       children: [
         Material(
-          color: widget.chatIndex == 0 ? scaffoldBackgroundColor : cardColor,
+          color: widget.chatIndex == 0
+              ? isDark
+                  ? scaffoldBackgroundColorDark
+                  : scaffoldBackgroundColor
+              : isDark
+                  ? Color.fromARGB(213, 52, 54, 74)
+                  : cardColor,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -96,16 +104,18 @@ class _ChatWidgetState extends State<ChatWidget> {
                       child: widget.chatIndex == 0
                           ? TextWidget(
                               label: widget.msg,
-                              color: text1Color,
+                              color: isDark? text1ColorDark: text1Color,
                               fontSize: 15,
                               fontWeight: FontWeight.normal,
+                              
                             )
                           : widget.shouldAnimate
                               ? Padding(
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: DefaultTextStyle(
+                                    textAlign: TextAlign.justify,
                                     style: GoogleFonts.nunitoSans(
-                                      color: text1Color,
+                                      color: isDark? text1ColorDark: text1Color,
                                       fontSize: 15,
                                       fontWeight: FontWeight.normal,
                                     ),
@@ -123,9 +133,18 @@ class _ChatWidgetState extends State<ChatWidget> {
                                     ),
                                   ),
                                 )
-                              : Text(
-                                  widget.msg.trim(),
-                                ),
+                              : Padding(
+                                padding: const EdgeInsets.only(top:5,right:5),
+                                child: Text(
+                                  textAlign: TextAlign.justify,
+                                    widget.msg.trim(),
+                                    style: GoogleFonts.nunitoSans(
+                                      color: isDark? text1ColorDark: text1Color,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                              ),
                     ),
                   ],
                 ),

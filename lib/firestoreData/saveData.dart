@@ -117,13 +117,16 @@ class FirestoreService {
           "status": status,
         });
         if(status == "neutral"){
-          // nuke the document from likes_dislikes collection
+          // the document from likes_dislikes collection
           await FirebaseFirestore.instance
-          .collection('likes_dislikes').doc(documentReference.id).delete();
+          .collection('likes_dislikes')
+          .doc(documentReference.id)
+          .delete();
           return;
         }
         // create a document in likes_dislike collection
-        await FirebaseFirestore.instance.collection('likes_dislikes')
+        await FirebaseFirestore.instance
+        .collection('likes_dislikes')
         .doc(documentReference.id)
         .set(
           {
@@ -131,6 +134,8 @@ class FirestoreService {
             "status": status,
             "created_by": FirebaseAuth.instance.currentUser!.uid,
             "created_at": FieldValue.serverTimestamp(),
+            // add chatId here  
+            "chat_id": chatId,
           },
           SetOptions(
             merge: true,
